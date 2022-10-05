@@ -95,6 +95,7 @@ void placement(char (*plateau)[][TAILLE_PLATEAU])
     sorti = 0;
     while (ok == 0 || sorti != 0)
     {
+      sorti = 0;
       affiche_plateau(plateau);
       printf("\033[31m");
       printf("%s\n", message);
