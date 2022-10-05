@@ -3,6 +3,7 @@ Nom : navale.c
 Auteur : Julien Zamit et Baptiste Blomme
 Date : 05/10/2022
 Description : Jeu de bataille navale deux joueurs
+Version : 1
 */
 
 #include <stdio.h>
