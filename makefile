@@ -6,3 +6,6 @@ git:
 	git add .
 	git commit -m "v2"
 	git push
+
+import:
+	git pull origin master
