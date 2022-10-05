@@ -3,7 +3,6 @@ Nom : navale.c
 Auteur : Julien Zamit et Baptiste Blomme
 Date : 05/10/2022
 Description : Jeu de bataille navale deux joueurs
-Version : 1
 */
 
 #include <stdio.h>
@@ -12,9 +11,6 @@ Version : 1
 #include <stdlib.h>
 // definition TAILLE_PLATEAU
 #define TAILLE_PLATEAU 10
-
-// plateau (matrice caré de longueur TAILLE_PLATEAU)
-char plateau[TAILLE_PLATEAU][TAILLE_PLATEAU];
 
 void viderBuffer()
 {
@@ -26,22 +22,22 @@ void viderBuffer()
 }
 
 // fonction initialisation du plateau
-void init_plateau()
+void init_plateau(char (*plateau)[][TAILLE_PLATEAU])
 {
   int i, j;
   for (i = 0; i < TAILLE_PLATEAU; i++)
   {
     for (j = 0; j < TAILLE_PLATEAU; j++)
     {
-      plateau[i][j] = '~';
+      (*plateau)[i][j] = '~';
     }
   }
 }
 
 // fonction affichage du plateau
-void affiche_plateau()
+void affiche_plateau(char (*plateau)[][TAILLE_PLATEAU])
 {
-  //on clear le terminal
+  // on clear le terminal
   system("clear");
 
   int i, j;
@@ -51,17 +47,26 @@ void affiche_plateau()
     if (i != 0)
     {
       // on utilise l'assci pour afficher les lettres
+      printf("\033[32m");
+
       printf("%c ", i + 64);
+      printf("\033[00m");
     }
     for (j = 0; j < TAILLE_PLATEAU; j++)
     {
       if (i == 0)
       {
+        printf("\033[32m");
+
         printf("%d ", j);
+        printf("\033[00m");
       }
       else
       {
-        printf("%c ", plateau[i][j]);
+        printf("\033[34m");
+
+        printf("%c ", (*plateau)[i][j]);
+        printf("\033[00m");
       }
     }
     printf("\n");
@@ -69,7 +74,7 @@ void affiche_plateau()
 }
 
 // fonction placement des bateaux
-void placement()
+void placement(char (*plateau)[][TAILLE_PLATEAU])
 {
   // tableau nom des batteaux
   char nom_bateau[5][20] = {"porte-avion", "croiseur", "contre-torpilleur", "sous-marin", "torpilleur"};
@@ -82,7 +87,7 @@ void placement()
   char direction;
   int ok;
   int sorti;
-  //string message d'erreur 
+  // string message d'erreur
   char message[100];
   for (i = 0; i < 5; i++)
   {
@@ -90,7 +95,7 @@ void placement()
     sorti = 0;
     while (ok == 0 || sorti != 0)
     {
-      affiche_plateau();
+      affiche_plateau(plateau);
       printf("\033[31m");
       printf("%s\n", message);
       printf("\033[00m");
@@ -115,7 +120,7 @@ void placement()
       }
       else
       {
-        
+
         sprintf(message, "données incorrectes");
       }
       if (ok == 1)
@@ -135,7 +140,7 @@ void placement()
         }
         else if (direction == 'B')
         {
-          if (y + taille_bateau[i] -1> TAILLE_PLATEAU)
+          if (y + taille_bateau[i] - 1 > TAILLE_PLATEAU)
           {
             sprintf(message, "bateau sort du tableau");
             sorti = 1;
@@ -159,7 +164,7 @@ void placement()
         }
         else if (direction == 'G')
         {
-          if (x - taille_bateau[i] +1< 0)
+          if (x - taille_bateau[i] + 1 < 0)
           {
             sprintf(message, "bateau sort du tableau");
             sorti = 1;
@@ -176,7 +181,7 @@ void placement()
           {
             for (j = 0; j < taille_bateau[i]; j++)
             {
-              if (plateau[y - j][x] != '~')
+              if ((*plateau)[y - j][x] != '~')
               {
                 sprintf(message, "bateau chevauche un autre bateau");
                 ok = 0;
@@ -187,7 +192,7 @@ void placement()
           {
             for (j = 0; j < taille_bateau[i]; j++)
             {
-              if (plateau[y + j][x] != '~')
+              if ((*plateau)[y + j][x] != '~')
               {
                 sprintf(message, "bateau chevauche un autre bateau");
                 ok = 0;
@@ -198,7 +203,7 @@ void placement()
           {
             for (j = 0; j < taille_bateau[i]; j++)
             {
-              if (plateau[y][x + j] != '~')
+              if ((*plateau)[y][x + j] != '~')
               {
                 sprintf(message, "bateau chevauche un autre bateau");
                 ok = 0;
@@ -209,7 +214,7 @@ void placement()
           {
             for (j = 0; j < taille_bateau[i]; j++)
             {
-              if (plateau[y][x - j] != '~')
+              if ((*plateau)[y][x - j] != '~')
               {
                 sprintf(message, "bateau chevauche un autre bateau");
                 ok = 0;
@@ -219,35 +224,35 @@ void placement()
         }
       }
     }
-    //on suprime le message d'erreur
+    // on suprime le message d'erreur
     sprintf(message, "");
     // on place le bateau representer par un 'B'
     if (direction == 'H')
     {
       for (j = 0; j < taille_bateau[i]; j++)
       {
-        plateau[y - j][x] = 'B';
+        (*plateau)[y - j][x] = 'B';
       }
     }
     else if (direction == 'B')
     {
       for (j = 0; j < taille_bateau[i]; j++)
       {
-        plateau[y + j][x] = 'B';
+        (*plateau)[y + j][x] = 'B';
       }
     }
     else if (direction == 'D')
     {
       for (j = 0; j < taille_bateau[i]; j++)
       {
-        plateau[y][x + j] = 'B';
+        (*plateau)[y][x + j] = 'B';
       }
     }
     else if (direction == 'G')
     {
       for (j = 0; j < taille_bateau[i]; j++)
       {
-        plateau[y][x - j] = 'B';
+        (*plateau)[y][x - j] = 'B';
       }
     }
   }
@@ -255,8 +260,18 @@ void placement()
 
 int main()
 {
-  init_plateau();
-  placement();
-  affiche_plateau();
+  // plateau (matrice caré de longueur TAILLE_PLATEAU)
+  char plateau[TAILLE_PLATEAU][TAILLE_PLATEAU];
+  // on initialise le plateau
+  init_plateau(&plateau);
+  // on place les bateaux
+  placement(&plateau);
+  // on affiche le plateau
+  affiche_plateau(&plateau);
+  // On crée le plateau de l'adversaire
+  char plateau_adversaire[TAILLE_PLATEAU][TAILLE_PLATEAU];
+  // on initialise le plateau
+  init_plateau(&plateau_adversaire);
+
   return 0;
 }
