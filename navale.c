@@ -259,20 +259,51 @@ void placement(char (*plateau)[][TAILLE_PLATEAU])
   }
 }
 
+// fonction menu
+void menu()
+{
+
+  printf("1 - Créer une partie\n");
+  printf("2 - Rejoindre\n");
+  printf("3 - Quitter\n");
+
+  printf("Votre choix : ");
+
+  int choix;
+  scanf("%d", &choix);
+  viderBuffer();
+  switch (choix)
+  {
+  case 1:
+    printf("Créer une partie\n");
+    break;
+  case 2:
+    printf("Rejoindre\n");
+    break;
+  case 3:
+
+    printf("Au revoir\n");
+    break;
+  default:
+    system("clear");
+    printf("\033[31m");
+    printf("Choix incorrect\n");
+
+    printf("\033[00m");
+    menu();
+    break;
+  }
+}
+
 int main()
 {
-  // plateau (matrice caré de longueur TAILLE_PLATEAU)
-  char plateau[TAILLE_PLATEAU][TAILLE_PLATEAU];
-  // on initialise le plateau
-  init_plateau(&plateau);
-  // on place les bateaux
-  placement(&plateau);
-  // on affiche le plateau
-  affiche_plateau(&plateau);
-  // On crée le plateau de l'adversaire
-  char plateau_adversaire[TAILLE_PLATEAU][TAILLE_PLATEAU];
-  // on initialise le plateau
-  init_plateau(&plateau_adversaire);
+  system("clear");
+
+  // on affiche en vert
+  printf("\033[32m");
+  printf("Bienvenue dans la bataille navale\n");
+  printf("\033[00m");
+  menu();
 
   return 0;
 }
