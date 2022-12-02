@@ -9,18 +9,8 @@ Description : Jeu de bataille navale deux joueurs
 #include <string.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>  
-
-
-
-
-
 // definition TAILLE_PLATEAU
 #define TAILLE_PLATEAU 10
-
 
 void viderBuffer()
 {
@@ -235,11 +225,6 @@ void placement(char (*plateau)[][TAILLE_PLATEAU])
         }
       }
     }
-
-
-
-
-
     // on suprime le message d'erreur
     sprintf(message, "");
     // on place le bateau representer par un 'B'
@@ -274,28 +259,6 @@ void placement(char (*plateau)[][TAILLE_PLATEAU])
   }
 }
 
-
-
-
-
-  
-
-int ajout_memoire_partagée(){
-    key_t key;
-    key = ftok("navale.c", 1);
-    if(key == -1)
-    {
-        perror("Erreur lors de la création de la clef");
-        exit(1);
-    }
-    
-    int id = shmget(key, 100, IPC_CREAT | 0666);
-    char * adr = shmat(id, NULL, 0);
-    return 0;
-}
-
-
-
 // fonction menu
 void menu()
 {
@@ -312,18 +275,12 @@ void menu()
   switch (choix)
   {
   case 1:
-    system("clear");
-    printf("\033[32m");
-    printf("Creation de la partie\n");
-    printf("\033[00m");
-;
-    ajout_memoire_partagée();
+    printf("Créer une partie\n");
     break;
   case 2:
     printf("Rejoindre\n");
     break;
   case 3:
-    system("clear");
 
     printf("Au revoir\n");
     break;
@@ -338,11 +295,10 @@ void menu()
   }
 }
 
-
 int main()
 {
   system("clear");
-  printf("👸");
+
   // on affiche en vert
   printf("\033[32m");
   printf("Bienvenue dans la bataille navale\n");
