@@ -9,6 +9,13 @@ Description : Jeu de bataille navale deux joueurs
 #include <string.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#define CHECK(status, message) if (status == -1 ) { perror(message); exit(-1); }
+
 // definition TAILLE_PLATEAU
 #define TAILLE_PLATEAU 10
 
@@ -259,6 +266,117 @@ void placement(char (*plateau)[][TAILLE_PLATEAU])
   }
 }
 
+// fonction qui génère une clé aléatoire de 5 caractères
+int genererCle()
+{
+  int cle = 0;
+  int i;
+  for (i = 0; i < 5; i++)
+  {
+    cle = cle * 10 + rand() % 10;
+  }
+  // vérifier que cette clé n'est pas déjà présente dans le fichier cle.txt
+  FILE *fichier = fopen("cle.txt", "r");
+  int cleFichier;
+  int ok = 1;
+  while (fscanf(fichier, "%d", &cleFichier) != EOF)
+  {
+    if (cleFichier == cle)
+    {
+      ok = 0;
+    }
+  }
+  fclose(fichier);
+  if (ok == 0)
+  {
+    return genererCle();
+  }
+  else
+  {
+    return cle;
+  }
+}
+
+// Création de la partie et envoie de la clé dans une boîte au lettre
+void creer_partie(){
+  struct sigaction newact_fils;
+  printf("\nCréation de la partie ! \n\n");
+  int cle = genererCle();
+  printf("Votre clé est : %d\n\n", cle);
+  printf("-> Envoyez cette clé à votre adversaire pour qu'il rejoigne ! \n\n");
+
+  // ecrire dans le fichier cle.txt
+  FILE *fichier = NULL;
+  fichier = fopen("cle.txt", "a");
+  fprintf(fichier, "%d\n", cle);
+  fclose(fichier);
+  
+  // attente de l'adversaire
+  printf("--En attente de l'adversaire--\n");
+  
+  // TODO : attente de l'adversaire (signal SIGUSR1)
+  // Attendre jusqu'à la réception du signal SIGUSR1
+  // Si oui sortir de la boucle
+
+
+  printf("Appuyez sur entrée pour continuer\n");
+  viderBuffer();
+  system("clear");
+
+  jouer();
+}
+
+void rejoindre_partie(){
+  printf("\nRejoindre une partie ! \n\n");
+  int cle = 0;
+
+  printf("Entrez la clé de la partie : ");
+  scanf("%d", &cle);
+
+  // vérifier que la clé est présente dans le fichier cle.txt
+  FILE *fichier = fopen("cle.txt", "r");
+  int cleFichier;
+  int ok = 0;
+  while (fscanf(fichier, "%d", &cleFichier) != EOF)
+  {
+    if (cleFichier == cle)
+    {
+      ok = 1;
+      // sortir de la boucle
+      break;
+    }
+  }
+  fclose(fichier);
+
+  if (ok == 1)
+  {
+    // envoie d'un signal de confirmation SIGALARM à la fonction creer_partie
+    signal(SIGUSR1, creer_partie);
+    printf("La partie est prête !\n");
+    printf("Appuyez sur entrée pour continuer\n");
+    viderBuffer();
+    system("clear");
+    jouer();
+  }
+  else
+  {
+    printf("La partie n'existe pas !\n");
+    printf("Appuyez sur entrée pour continuer\n");
+    viderBuffer();
+    system("clear");
+    menu();
+  }
+}
+
+// fonction jouer qui place les bateau et lance la partie
+void jouer()
+{
+  // Placement des bateaux
+  char plateau[TAILLE_PLATEAU][TAILLE_PLATEAU];
+  init_plateau(&plateau);
+  placement(&plateau);
+}
+
 // fonction menu
 void menu()
 {
@@ -271,19 +389,23 @@ void menu()
 
   int choix;
   scanf("%d", &choix);
+
   viderBuffer();
+
   switch (choix)
   {
   case 1:
-    printf("Créer une partie\n");
+    creer_partie();
     break;
-  case 2:
-    printf("Rejoindre\n");
-    break;
-  case 3:
 
+  case 2:
+    rejoindre_partie();
+    break;
+
+  case 3:
     printf("Au revoir\n");
     break;
+
   default:
     system("clear");
     printf("\033[31m");
