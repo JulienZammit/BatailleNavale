@@ -10,7 +10,7 @@ Le but du jeu est de couler tous les bateaux de l'adversaire en tirant sur les c
 
 Pour jouer, il vous suffit de lancer le programme sur deux terminaux différents. Sur le premier terminal, le joueur doit créer une partie en suivant les instructions données. Sur le second terminal, le joueur doit entrer l'identifiant de la partie pour la rejoindre. 
 
-Une fois la partie lancée, les joueurs doivent placer leurs bateaux sur leur grille de jeu en suivant les instructions données dans le jeu. La partie peut alors débuter, et les joueurs doivent se tourner pour tirer sur les cases de la grille de l'adversaire. 
+Une fois la partie lancée, les joueurs doivent placer leurs bateaux sur leur grille de jeu en suivant les instructions données dans le jeu. La partie peut alors débuter, et les joueurs peuvent canarder leur adversaire ! 
 
 Le jeu se termine lorsqu'un joueur a coulé tous les bateaux de l'adversaire. 
 
