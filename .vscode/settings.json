@@ -31,5 +31,6 @@
   "files.associations": {
     "serveur_navale.C": "cpp",
     "ipc.h": "c"
-  }
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }
