@@ -550,7 +550,6 @@ void jouer()
       int x; 
       char y;
       printf("x : ");
-      printf("x : ");
       scanf("%d", &x);
       viderBuffer();
       printf("y : ");
@@ -566,6 +565,7 @@ void jouer()
         system("clear");
         continue;
       }
+      printf("x : %d, y : %c\n", x, y);
       //on regarde si le tire est déjà effectué
       if(plateauAdversaire[x][y] == 'X' || plateauAdversaire[x][y] == 'O'){
         printf("Tir déjà effectué !\n");
@@ -585,6 +585,7 @@ void jouer()
       requete.type = player;
       requete.corps = corps;
       msgsnd(boite, &requete, sizeof(t_corps), 0);
+      printf("message envoyé ! %s\n", requete.corps.message);
       //on attend la réponse de l'adversaire
       t_requete requeteRecue;
       //on veux que le type de la requette soit 1 si player = 2 et 2 si player = 1
