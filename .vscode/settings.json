@@ -29,6 +29,7 @@
     "**/.vscode/**"
   ],
   "files.associations": {
-    "serveur_navale.C": "cpp"
+    "serveur_navale.C": "cpp",
+    "ipc.h": "c"
   }
 }

@@ -13,11 +13,29 @@ Description : Jeu de bataille navale deux joueurs
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
 #define CHECK(status, message) if (status == -1 ) { perror(message); exit(-1); }
 
 // definition TAILLE_PLATEAU
 #define TAILLE_PLATEAU 10
+
+
+typedef struct 
+{ 
+  char (*plateau)[][TAILLE_PLATEAU];
+  char message[100];
+} t_corps;
+
+
+//st boite au lettre
+typedef struct requete
+{
+  long type;
+  t_corps lettre;
+} t_requete;
+
 
 
 //declaration des fonctions
@@ -28,6 +46,9 @@ void placement(char (*plateau)[][TAILLE_PLATEAU]);
 void jouer();
 void menu();
 
+
+int boite;
+
 void viderBuffer()
 {
   int c = 0;
@@ -36,6 +57,45 @@ void viderBuffer()
     c = getchar();
   }
 }
+
+
+void infoBoite(int idBoite)
+{
+  struct msqid_ds boite;
+  int ret;
+  ret = msgctl(idBoite, IPC_STAT, &boite);
+  if (ret == -1)
+  {
+    perror("msgctl");
+    exit(1);
+  }
+  printf("ID de la boite : %d\n", boite.msg_perm.__key);
+  printf("UID de la boite : %d\n", boite.msg_perm.uid);
+  printf("GID de la boite : %d\n", boite.msg_perm.gid);
+  printf("UID de la boite : %d\n", boite.msg_perm.cuid);
+  printf("GID de la boite : %d\n", boite.msg_perm.cgid);
+  printf("Mode de la boite : %d\n", boite.msg_perm.mode);
+  printf("Nombre de messages dans la boite : %ld\n", boite.msg_qnum);
+  printf("Taille maximale de la boite : %ld\n", boite.msg_qbytes);
+  printf("PID du dernier processus ayant envoyé un message : %d\n", boite.msg_lspid);
+  printf("PID du dernier processus ayant reçu un message : %d\n", boite.msg_lrpid);
+  printf("Temps de la dernière opération sur la boite : %ld\n", boite.msg_stime);
+}
+
+void envoieMessage(int idBoite, t_requete *message)
+{
+  int ret;
+  ret = msgsnd(idBoite, message, sizeof(t_requete), 0);
+
+  if (ret == -1)
+  {
+    perror("msgsnd");
+    exit(1);
+  }
+}
+
+
+
 
 // fonction initialisation du plateau
 void init_plateau(char (*plateau)[][TAILLE_PLATEAU])
@@ -318,7 +378,18 @@ void handler(int sig)
 {
   printf("Signal %d reçu !\n", sig);
   printf("Adversaire trouvé !\n");
-  
+
+  //on cree la boite aux lettres
+  int cle = getpid();
+  boite = msgget(cle, IPC_CREAT | 0666);
+  if (boite == -1)
+  {
+    perror("msgget");
+    exit(1);
+  }
+  infoBoite(boite);
+
+
 
   printf("Appuyez sur entrée pour continuer\n");
   viderBuffer();
@@ -411,6 +482,14 @@ void jouer()
   char plateau[TAILLE_PLATEAU][TAILLE_PLATEAU];
   init_plateau(&plateau);
   placement(&plateau);
+
+  //quand le bateau est placé on attend que l'adversaire place ses bateaux
+  printf("En attente de l'adversaire...\n");
+  
+
+
+
+
 }
 
 // fonction menu
