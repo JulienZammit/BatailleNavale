@@ -8,7 +8,7 @@ Le but du jeu est de couler tous les bateaux de l'adversaire en tirant sur les c
 
 ## Comment jouer
 
-Pour jouer, il vous suffit de lancer le programme sur deux terminaux différents. Sur le premier terminal, le joueur doit créer une partie en suivant les instructions données. Sur le second terminal, le joueur doit entrer l'identifiant de la partie pour la rejoindre. 
+Pour jouer, il vous suffit de lancer le programme sur deux terminaux différents en lancant la commande "make". Sur le premier terminal, le joueur doit créer une partie en suivant les instructions données. Sur le second terminal, le joueur doit entrer l'identifiant de la partie pour la rejoindre. 
 
 Une fois la partie lancée, les joueurs doivent placer leurs bateaux sur leur grille de jeu en suivant les instructions données dans le jeu. La partie peut alors débuter, et les joueurs peuvent canarder leur adversaire ! 
 
