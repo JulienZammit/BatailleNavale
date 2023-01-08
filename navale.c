@@ -459,8 +459,18 @@ void rejoindre_partie(){
   {
     // envoie d'un signal de confirmation SIGALARM à la fonction creer_partie
     kill(cle, SIGUSR1);
+    // on cree la boite aux lettres
+    boite = msgget(cle, IPC_CREAT | 0666);
+    if (boite == -1)
+    {
+      perror("msgget");
+      exit(1);
+    }
+    infoBoite(boite);
+
     printf("La partie est prête !\n");
     printf("Appuyez sur entrée pour continuer\n");
+    
     viderBuffer();
     system("clear");
     jouer();
