@@ -24,8 +24,9 @@ Description : Jeu de bataille navale deux joueurs
 
 typedef struct 
 { 
-  char (*plateau)[][TAILLE_PLATEAU];
   char message[100];
+  int x;
+  char y;
 } t_corps;
 
 
@@ -33,7 +34,7 @@ typedef struct
 typedef struct requete
 {
   long type;
-  t_corps lettre;
+  t_corps corps;
 } t_requete;
 
 
@@ -48,6 +49,8 @@ void menu();
 
 
 int boite;
+int player;//1 pour le createur de la partie et 2 pour le joueur qui rejoint la partie
+
 
 void viderBuffer()
 {
@@ -376,7 +379,6 @@ int genererCle()
 
 void handler(int sig)
 {
-  printf("Signal %d reçu !\n", sig);
   printf("Adversaire trouvé !\n");
 
   //on cree la boite aux lettres
@@ -387,12 +389,10 @@ void handler(int sig)
     perror("msgget");
     exit(1);
   }
-  infoBoite(boite);
 
 
 
-  printf("Appuyez sur entrée pour continuer\n");
-  viderBuffer();
+  
   system("clear");
 
   jouer();
@@ -401,6 +401,7 @@ void handler(int sig)
 
 // Création de la partie et envoie de la clé dans une boîte au lettre
 void creer_partie(){
+  player = 1;
   struct sigaction newact_fils;
   printf("\nCréation de la partie ! \n\n");
   int cle = getpid();
@@ -434,6 +435,7 @@ void creer_partie(){
 }
 
 void rejoindre_partie(){
+  player = 2;
   printf("\nRejoindre une partie ! \n\n");
   int cle = 0;
 
@@ -466,11 +468,11 @@ void rejoindre_partie(){
       perror("msgget");
       exit(1);
     }
-    infoBoite(boite);
 
     printf("La partie est prête !\n");
     printf("Appuyez sur entrée pour continuer\n");
     
+
     viderBuffer();
     system("clear");
     jouer();
@@ -485,6 +487,23 @@ void rejoindre_partie(){
   }
 }
 
+
+// Créer une fonction de vérification de victoire. Elle renvoie 1 si le joueur a gagné, 0 sinon.
+int detection_victoire(char (*plateau)[][TAILLE_PLATEAU]){
+  int i, j;
+  for (i = 0; i < 10; i++)
+  {
+    for (j = 0; j < 10; j++)
+    {
+      if ((*plateau)[i][j] == 'B')
+      {
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
 // fonction jouer qui place les bateau et lance la partie
 void jouer()
 {
@@ -492,10 +511,170 @@ void jouer()
   char plateau[TAILLE_PLATEAU][TAILLE_PLATEAU];
   init_plateau(&plateau);
   placement(&plateau);
+  affiche_plateau(&plateau);
 
   //quand le bateau est placé on attend que l'adversaire place ses bateaux
   printf("En attente de l'adversaire...\n");
-  
+  //on envoie un message pour dire que le joueur a fini de placer ses bateaux
+  t_corps corps;
+  strcpy(corps.message, "placement");
+  t_requete requete;
+  requete.type = player;
+  requete.corps = corps;
+  msgsnd(boite, &requete, sizeof(t_corps), 0);
+
+  //on attend que l'adversaire ait fini de placer ses bateaux
+  t_requete requeteRecue;
+  //on veux que le type de la requette soit 1 si player = 2 et 2 si player = 1
+  int type = (player == 1) ? 2 : 1;
+  msgrcv(boite, &requeteRecue, sizeof(t_corps), type, 0);
+  printf("L'adversaire a fini de placer ses bateaux !\n");
+
+  system("clear");
+  printf("La partie commence !\n");
+
+  int partie = 1;
+  int tonTour = player;
+  //plateau de l'adversaire
+  char plateauAdversaire[TAILLE_PLATEAU][TAILLE_PLATEAU];
+  init_plateau(&plateauAdversaire);
+
+  while (partie)
+  {
+    if(tonTour == 1){
+      //on affiche le plateau de l'adversaire
+      printf("Plateau de l'adversaire\n");
+      affiche_plateau(&plateauAdversaire);
+      //on demande au joueur de tirer
+      printf("Où voulez-vous tirer ?\n");
+      int x; 
+      char y;
+      printf("x : ");
+      printf("x : ");
+      scanf("%d", &x);
+      viderBuffer();
+      printf("y : ");
+      scanf("%c", &y);
+      viderBuffer();
+      y = y - 64;
+
+      //on regarde si le tire est valide 
+      if(x < 0 || x > 9 || y < 0 || y > 9){
+        printf("Tir invalide !\n");
+        printf("Appuyez sur entrée pour continuer\n");
+        viderBuffer();
+        system("clear");
+        continue;
+      }
+      //on regarde si le tire est déjà effectué
+      if(plateauAdversaire[x][y] == 'X' || plateauAdversaire[x][y] == 'O'){
+        printf("Tir déjà effectué !\n");
+        printf("Appuyez sur entrée pour continuer\n");
+        viderBuffer();
+        system("clear");
+        continue;
+      }
+      //on envoie le tire à l'adversaire
+      t_corps corps;
+
+      strcpy(corps.message, "tir");
+      corps.x = x;
+      corps.y = y;
+            
+      t_requete requete;
+      requete.type = player;
+      requete.corps = corps;
+      msgsnd(boite, &requete, sizeof(t_corps), 0);
+      //on attend la réponse de l'adversaire
+      t_requete requeteRecue;
+      //on veux que le type de la requette soit 1 si player = 2 et 2 si player = 1
+      int type = (player == 1) ? 2 : 1;
+      msgrcv(boite, &requeteRecue, sizeof(t_corps), type, 0);
+      //on regarde si le tire est un touché ou un coulé
+      if(strcmp(requeteRecue.corps.message, "touche") == 0){
+        printf("Touché !\n");
+        //on met un X sur le plateau de l'adversaire
+        plateauAdversaire[x][y] = 'X';
+      }
+      else if(strcmp(requeteRecue.corps.message, "coule") == 0){
+        printf("Coulé !\n");
+        //on met un O sur le plateau de l'adversaire
+        plateauAdversaire[x][y] = 'O';
+      }
+      else if (strcmp(requeteRecue.corps.message, "rate") == 0){
+        printf("Raté !\n");
+        //on met un O sur le plateau de l'adversaire
+        plateauAdversaire[x][y] = 'O';
+      }
+      else {
+        printf("Partie terminée vous avez gagné!\n");
+        partie = 0;
+        exit(0);
+      }
+      //on passe le tour à l'adversaire
+      tonTour = 2;
+      
+    }
+    else {
+      //on est la partie adverse
+      //on attend le tire de l'adversaire
+      t_requete requeteRecue;
+      //on veux que le type de la requette soit 1 si player = 2 et 2 si player = 1
+      int type = (player == 1) ? 2 : 1;
+      msgrcv(boite, &requeteRecue, sizeof(t_corps), type, 0);
+      //on regarde si le tire est un touché ou un coulé
+      if(strcmp(requeteRecue.corps.message, "tire") == 0){
+        //on regarde dans le plateau si le tire est un touché ou un coulé B est un bateau ~ est de l'eau 0 est un tire echouer
+        if(plateau[requeteRecue.corps.x][requeteRecue.corps.y] == 'B'){
+          printf("Touché !\n");
+          //on verifi si il reste des bateaux
+          int result =  detection_victoire(&plateau);
+          if(result == 1){
+            printf("Partie terminée vous avez perdu!\n");
+            t_corps corps;
+            strcpy(corps.message, "finito");
+            t_requete requete;
+            requete.type = player;
+            requete.corps = corps;
+            msgsnd(boite, &requete, sizeof(t_corps), 0);
+            partie = 0;
+            exit(0);
+          }
+          //on met un X sur le plateau de l'adversaire
+          plateau[requeteRecue.corps.x][requeteRecue.corps.y] = 'X';
+          //on envoie un message touché à l'adversaire
+          t_corps corps;
+          strcpy(corps.message, "touche");
+          corps.x = requeteRecue.corps.x;
+          corps.y = requeteRecue.corps.y;
+          t_requete requete;
+          requete.type = player;
+          requete.corps = corps;
+          msgsnd(boite, &requete, sizeof(t_corps), 0);
+        }
+        
+        else if(plateau[requeteRecue.corps.x][requeteRecue.corps.y] == '~'){
+          printf("Raté !\n");
+          //on met un O sur le plateau de l'adversaire
+          plateau[requeteRecue.corps.x][requeteRecue.corps.y] = 'O';
+          //on envoie un message raté à l'adversaire
+          t_corps corps;
+          strcpy(corps.message, "rate");
+          corps.x = requeteRecue.corps.x;
+          corps.y = requeteRecue.corps.y;
+          t_requete requete;
+          requete.type = player;
+          requete.corps = corps;
+          msgsnd(boite, &requete, sizeof (t_corps), 0);
+        }
+
+      }
+        
+    }
+  }
+
+
+
 
 
 
