@@ -10,7 +10,8 @@ Le but du jeu est de couler tous les bateaux de l'adversaire en tirant sur les c
 
 Pour jouer, il vous suffit de lancer le programme sur deux terminaux différents en lancant la commande "make". Sur le premier terminal, le joueur doit créer une partie en suivant les instructions données. Sur le second terminal, le joueur doit entrer l'identifiant de la partie pour la rejoindre. 
 
-Une fois la partie lancée, les joueurs doivent placer leurs bateaux sur leur grille de jeu en suivant les instructions données dans le jeu. La partie peut alors débuter, et les joueurs peuvent canarder leur adversaire ! 
+Une fois la partie lancée, les joueurs doivent placer leurs bateaux sur leur grille de jeu en suivant les instructions données dans le jeu. Pur cela, il suffit d'indiquer un chiffre entre 1 à 9 pour l'abssice X et une lettre de A à I pour l'ordonnée Y. Il suffit ensuite d'indiquer le sens du bateau : B pour Bas, H pour Haut, D pour Droite et G pour Gauche. 
+La partie peut alors débuter, et les joueurs peuvent canarder leur adversaire. Pour cela il suffit simplement d'indiquer un chiffre entre 1 à 9 pour l'abssice X et une lettre de A à I pour l'ordonnée Y.
 
 Le jeu se termine lorsqu'un joueur a coulé tous les bateaux de l'adversaire. 
 
