@@ -763,7 +763,7 @@ void jouer()
         continue;
       }
       // Vérification que le tir n'a pas déjà été effectué
-      if (plateauAdversaire[y + 1][x] == 'X' || plateauAdversaire[y][x + 1] == 'O')
+      if (plateauAdversaire[y + 1][x] == 'X' || plateauAdversaire[y+1][x] == 'O')
       {
         printf("Tir déjà effectué !\n");
         printf("Appuyez sur entrée pour continuer\n");
